@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05030c">
+<meta name="format-detection" content="telephone=no">
+<title>묘신령 卯神靈 — AI 사주</title>
+<style>
+  :root{
+    --ink:#05030c; --ink2:#0a0616; --ink3:#120b22;
+    --cyan:#45e8ff; --magenta:#ff4fd8; --gold:#ffd166;
+    --txt:#f2edff; --dim:#a99ec4; --dim2:#7b719a;
+    --mok:#2fe08b; --hwa:#ff4d63; --to:#ffc247; --geum:#e6f2ff; --su:#3fd0ff;
+    --card:rgba(18,11,34,.82);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--ink); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Noto Sans CJK KR","Malgun Gothic",sans-serif;
+    -webkit-font-smoothing:antialiased; line-height:1.5; word-break:keep-all;
+    min-height:100vh; overflow-x:hidden;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(58% 34% at 50% -2%, rgba(255,79,216,.20), transparent 70%),
+      radial-gradient(52% 30% at -6% 52%, rgba(69,232,255,.14), transparent 72%),
+      radial-gradient(60% 36% at 104% 88%, rgba(255,209,102,.10), transparent 72%);
+  }
+  .lattice{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5; mix-blend-mode:screen;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(69,232,255,.055) 0 1px, transparent 1px 46px),
+      repeating-linear-gradient(90deg, rgba(255,79,216,.05) 0 1px, transparent 1px 46px);
+    mask-image:radial-gradient(70% 60% at 50% 20%, #000 20%, transparent 100%);
+    -webkit-mask-image:radial-gradient(70% 60% at 50% 20%, #000 20%, transparent 100%);
+  }
+  .app{position:relative; z-index:1; max-width:430px; margin:0 auto; padding:0 18px 56px}
+
+  /* ---------- header ---------- */
+  .top{display:flex; align-items:center; gap:10px; padding:18px 2px 6px}
+  .seal{
+    width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;
+    background:linear-gradient(150deg,#ff4fd8,#7a2bff 55%,#45e8ff);
+    box-shadow:0 0 18px rgba(255,79,216,.5), inset 0 0 0 1px rgba(255,255,255,.25);
+    font-weight:800;font-size:19px;color:#0a0616;letter-spacing:-1px;
+  }
+  .brand{display:flex;flex-direction:column;gap:1px}
+  .brand b{font-size:17px;letter-spacing:-.2px}
+  .brand b i{font-style:normal;color:var(--cyan);font-weight:600}
+  .brand span{font-size:11px;color:var(--dim2);letter-spacing:.4px}
+  .top .pill{
+    margin-left:auto;font-size:10.5px;color:var(--cyan);border:1px solid rgba(69,232,255,.34);
+    padding:5px 9px;border-radius:999px;background:rgba(69,232,255,.07);letter-spacing:.3px;white-space:nowrap
+  }
+
+  /* ---------- hero ---------- */
+  .hero{margin-top:14px;position:relative}
+  .hero-frame{
+    position:relative;border-radius:26px;padding:1.4px;
+    background:linear-gradient(150deg, rgba(69,232,255,.85), rgba(255,79,216,.7) 48%, rgba(255,209,102,.55));
+    box-shadow:0 24px 60px -28px rgba(255,79,216,.55), 0 10px 40px -20px rgba(69,232,255,.5);
+  }
+  .hero-in{border-radius:25px;overflow:hidden;background:#0a0616;position:relative}
+  .hero-in img{display:block;width:100%;height:auto}
+  .hero-in::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg, rgba(5,3,12,.05) 40%, rgba(5,3,12,.55) 78%, rgba(5,3,12,.94) 100%);
+  }
+  .hero-tag{
+    position:absolute;z-index:3;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;gap:8px;
+    font-size:10.5px;color:#dfe8ff;letter-spacing:.4px
+  }
+  .hero-tag span{
+    background:rgba(5,3,12,.55);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(6px);
+    padding:4px 9px;border-radius:999px
+  }
+  .bubble{
+    position:absolute;z-index:2;left:14px;right:14px;bottom:14px;
+    background:rgba(8,5,18,.86);border:1px solid rgba(69,232,255,.28);border-radius:16px;
+    padding:12px 14px;font-size:13.5px;line-height:1.62;color:#eef2ff;
+    box-shadow:0 8px 30px rgba(0,0,0,.5), inset 0 0 24px rgba(69,232,255,.06);
+  }
+  .bubble b{color:var(--cyan)}
+  .bubble .tail{
+    position:absolute;top:-7px;left:26px;width:12px;height:12px;transform:rotate(45deg);
+    background:rgba(8,5,18,.92);border-left:1px solid rgba(69,232,255,.28);border-top:1px solid rgba(69,232,255,.28)
+  }
+
+  /* ---------- cards ---------- */
+  .card{
+    margin-top:16px;background:var(--card);border:1px solid rgba(255,255,255,.075);
+    border-radius:20px;padding:16px 15px;backdrop-filter:blur(10px);
+    box-shadow:0 18px 40px -30px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .card-h{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+  .card-h .dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+  .card-h b{font-size:13.5px;letter-spacing:-.1px}
+  .card-h small{margin-left:auto;font-size:10.5px;color:var(--dim2)}
+
+  .field{margin-bottom:13px}
+  .field:last-child{margin-bottom:0}
+  .field > label{display:block;font-size:11.5px;color:var(--dim);margin-bottom:6px;letter-spacing:.2px}
+  .field > label em{font-style:normal;color:var(--cyan);font-size:10px;margin-left:5px;opacity:.9}
+  .input,select.input{
+    width:100%;height:46px;border-radius:12px;border:1px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.045);color:var(--txt);font-size:15px;padding:0 13px;
+    font-family:inherit;color-scheme:dark;appearance:none;-webkit-appearance:none;outline:none;
+    transition:border-color .18s, box-shadow .18s, background .18s
+  }
+  .input::placeholder{color:#6d6489}
+  .input:focus{border-color:rgba(69,232,255,.6);box-shadow:0 0 0 3px rgba(69,232,255,.13);background:rgba(69,232,255,.06)}
+  select.input{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1l6 6 6-6' fill='none' stroke='%23a99ec4' stroke-width='1.8' stroke-linecap='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 13px center;padding-right:36px
+  }
+  .input-date{display:flex;gap:8px}
+  .input-date .input{flex:1}
+
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .seg button{
+    height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);
+    color:var(--dim);font-size:14px;font-family:inherit;cursor:pointer;transition:.16s
+  }
+  .seg button[aria-pressed="true"]{
+    border-color:rgba(255,79,216,.62);color:#fff;background:linear-gradient(160deg,rgba(255,79,216,.22),rgba(122,43,255,.16));
+    box-shadow:0 0 0 3px rgba(255,79,216,.1), inset 0 0 18px rgba(255,79,216,.12)
+  }
+
+  .chips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .chips button{
+    display:flex;align-items:center;gap:7px;height:46px;padding:0 11px;border-radius:12px;
+    border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--dim);
+    font-size:13px;font-family:inherit;cursor:pointer;transition:.16s;text-align:left
+  }
+  .chips button .ico{font-size:15px;filter:saturate(1.1)}
+  .chips button[aria-pressed="true"]{
+    border-color:rgba(69,232,255,.62);color:#fff;background:linear-gradient(160deg,rgba(69,232,255,.2),rgba(122,43,255,.12));
+    box-shadow:0 0 0 3px rgba(69,232,255,.1)
+  }
+
+  .cta{
+    width:100%;margin-top:16px;height:56px;border:0;border-radius:16px;cursor:pointer;
+    font-family:inherit;font-size:16px;font-weight:800;letter-spacing:-.2px;color:#0a0616;
+    background:linear-gradient(100deg,#45e8ff,#8f7dff 46%,#ff4fd8);
+    box-shadow:0 14px 34px -14px rgba(255,79,216,.75), 0 8px 26px -14px rgba(69,232,255,.8);
+    transition:transform .12s, filter .2s
+  }
+  .cta:active{transform:scale(.985);filter:brightness(1.04)}
+  .cta[disabled]{filter:grayscale(.35) brightness(.8);cursor:default}
+  .cta-note{margin:9px 2px 0;font-size:10.5px;color:var(--dim2);text-align:center;line-height:1.5}
+
+  /* ---------- result ---------- */
+  #result{display:none}
+  #result.show{display:block;animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  .sect-title{display:flex;align-items:center;gap:9px;margin:26px 2px 10px}
+  .sect-title .bar{width:3px;height:15px;border-radius:2px;background:linear-gradient(180deg,var(--cyan),var(--magenta))}
+  .sect-title b{font-size:14px;letter-spacing:-.2px}
+  .sect-title small{margin-left:auto;font-size:10.5px;color:var(--dim2)}
+
+  /* 사주 명식표 */
+  .chart{display:grid;grid-template-columns:34px repeat(4,1fr);gap:6px;align-items:center}
+  .chart .head{font-size:10.5px;color:var(--dim2);text-align:center;letter-spacing:.3px;padding-bottom:2px}
+  .chart .rowlab{font-size:10px;color:var(--dim2);writing-mode:horizontal-tb;letter-spacing:.2px}
+  .cell{
+    position:relative;border-radius:12px;padding:7px 2px 6px;text-align:center;
+    background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)
+  }
+  .cell .hanja{display:block;font-size:23px;font-weight:700;line-height:1.15;color:var(--c);
+    text-shadow:0 0 14px color-mix(in srgb, var(--c) 45%, transparent)}
+  .cell .k{display:block;font-size:9.5px;color:var(--dim);margin-top:1px}
+  .cell .el{display:inline-block;margin-top:3px;font-size:9px;padding:1px 5px;border-radius:99px;
+    color:var(--c);background:color-mix(in srgb, var(--c) 15%, transparent);border:1px solid color-mix(in srgb, var(--c) 34%, transparent)}
+  .cell.me{border-color:rgba(255,79,216,.6);box-shadow:0 0 0 2px rgba(255,79,216,.13), inset 0 0 20px rgba(255,79,216,.1)}
+  .cell.me::after{content:"나";position:absolute;top:-8px;right:6px;font-size:8.5px;color:#0a0616;background:var(--magenta);
+    padding:1px 5px;border-radius:99px;font-weight:800;box-shadow:0 0 0 2px #0d0819}
+  .cell.unknown .hanja{color:#5d5478}
+
+  .chart-foot{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+  .tag{font-size:10.5px;color:var(--dim);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+    padding:4px 8px;border-radius:8px}
+  .tag b{color:#fff;font-weight:600}
+
+  /* 오행 방울 */
+  .bells{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:4px 0 12px}
+  .bell{text-align:center}
+  .bell .bwrap{position:relative;height:58px;display:grid;place-items:end center}
+  .bell svg{width:38px;height:46px;display:block;filter:drop-shadow(0 0 9px color-mix(in srgb, var(--c) 55%, transparent))}
+  .bell .cnt{position:absolute;bottom:11px;left:0;right:0;font-size:13px;font-weight:800;color:#08060f}
+  .bell .nm{font-size:10.5px;color:var(--c);margin-top:2px;font-weight:600}
+  .bell .pct{font-size:9.5px;color:var(--dim2)}
+  .bell.zero{opacity:.42}
+
+  .stack{display:flex;height:12px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.07)}
+  .stack i{display:block;height:100%;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+  .stack-legend{display:flex;justify-content:space-between;margin-top:7px;font-size:10px;color:var(--dim2)}
+  .verdict{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+  .verdict div{flex:1 1 44%;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.075);
+    border-radius:11px;padding:9px 10px;font-size:11px;color:var(--dim)}
+  .verdict div b{display:block;font-size:13px;color:#fff;margin-bottom:2px}
+  .verdict div b em{font-style:normal;color:var(--c)}
+
+  /* 팩폭 / 위로 */
+  .shot{position:relative;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.09);
+    box-shadow:0 24px 50px -30px #000}
+  .shot img{display:block;width:100%;height:auto}
+  .shot .badge{
+    position:absolute;top:10px;left:10px;font-size:10px;letter-spacing:.3px;
+    padding:5px 9px;border-radius:99px;backdrop-filter:blur(6px)
+  }
+  .shot.roast{box-shadow:0 0 0 1px rgba(255,77,99,.28), 0 22px 50px -26px rgba(255,77,99,.5)}
+  .shot.roast .badge{background:rgba(255,77,99,.9);color:#12050a;font-weight:800}
+  .shot.luck{box-shadow:0 0 0 1px rgba(69,232,255,.28), 0 22px 50px -26px rgba(69,232,255,.45)}
+  .shot.luck .badge{background:rgba(69,232,255,.92);color:#04222a;font-weight:800}
+
+  .say{
+    position:relative;margin-top:-18px;margin-left:10px;margin-right:10px;
+    background:rgba(12,7,24,.95);border:1px solid rgba(255,255,255,.1);border-radius:16px;
+    padding:15px 15px 14px;backdrop-filter:blur(8px)
+  }
+  .say .who{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--dim2);margin-bottom:7px}
+  .say .who b{color:var(--cyan);font-size:11px}
+  .say .line{font-size:15.5px;line-height:1.72;font-weight:700;letter-spacing:-.3px;color:#fff}
+  .say .line::before{content:"“"}
+  .say .line::after{content:"”"}
+  .say small{display:block;margin-top:9px;font-size:11px;color:var(--dim2)}
+
+  .say.warm{border-color:rgba(69,232,255,.3);background:linear-gradient(165deg, rgba(11,25,38,.96), rgba(12,7,24,.96))}
+  .say.warm .who b{color:var(--gold)}
+  .say.warm .line{font-weight:600;font-size:14.5px;color:#eaf6ff}
+  .warm-head{font-size:16px;font-weight:800;letter-spacing:-.3px;color:var(--gold);margin-bottom:8px;
+    text-shadow:0 0 18px rgba(255,209,102,.35)}
+  .luck-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
+  .luck-grid div{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 9px}
+  .luck-grid dt{font-size:9.5px;color:var(--dim2);margin-bottom:2px}
+  .luck-grid dd{margin:0;font-size:12px;color:#fff;font-weight:600}
+  .luck-grid .wide{grid-column:1/-1}
+
+  /* 바이럴 / 수익화 */
+  .share-btn{
+    width:100%;height:52px;border-radius:14px;cursor:pointer;font-family:inherit;font-weight:800;font-size:14.5px;
+    color:#fff;background:linear-gradient(100deg, rgba(255,79,216,.9), rgba(122,43,255,.9));
+    border:1px solid rgba(255,255,255,.18);box-shadow:0 16px 34px -18px rgba(255,79,216,.85)
+  }
+  .share-btn:active{transform:scale(.99)}
+  .share-note{margin:8px 2px 0;font-size:10.5px;color:var(--dim2);text-align:center}
+
+  .lock{position:relative;border-radius:18px;padding:15px;overflow:hidden;
+    background:linear-gradient(150deg, rgba(26,14,44,.95), rgba(12,7,24,.95));
+    border:1px solid rgba(255,209,102,.22)}
+  .lock::before{content:"";position:absolute;inset:0;background:
+    radial-gradient(60% 60% at 90% 0%, rgba(255,209,102,.16), transparent 70%)}
+  .lock + .lock{margin-top:10px}
+  .lock .lb{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;color:var(--gold);
+    border:1px solid rgba(255,209,102,.3);background:rgba(255,209,102,.08);padding:3px 8px;border-radius:99px}
+  .lock h4{margin:9px 0 5px;font-size:15px;letter-spacing:-.3px;position:relative}
+  .lock p{margin:0;font-size:11.5px;color:var(--dim);line-height:1.6;position:relative}
+  .lock ul{margin:10px 0 12px;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:5px;position:relative}
+  .lock li{font-size:10px;color:#cfc6e6;background:rgba(255,255,255,.06);border-radius:7px;padding:3px 7px}
+  .lock .buy{display:flex;align-items:center;gap:10px;position:relative}
+  .lock .price{font-size:16px;font-weight:800;color:var(--gold)}
+  .lock .price small{font-size:10px;color:var(--dim2);font-weight:400;margin-left:3px}
+  .lock .go{
+    margin-left:auto;height:40px;padding:0 16px;border-radius:11px;cursor:pointer;font-family:inherit;
+    font-size:12.5px;font-weight:700;color:#2a1d05;border:0;
+    background:linear-gradient(100deg,#ffd166,#ffb02e);box-shadow:0 10px 22px -12px rgba(255,209,102,.8)
+  }
+
+  .foot{margin-top:26px;font-size:10px;color:#5f567c;line-height:1.75;text-align:center}
+  .foot b{color:#837aa1}
+
+  /* ---------- modal ---------- */
+  .modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:18px;
+    background:rgba(3,2,8,.82);backdrop-filter:blur(8px)}
+  .modal.open{display:flex;animation:fade .2s both}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .sheet{width:100%;max-width:400px;max-height:88vh;overflow:auto;border-radius:22px;
+    background:linear-gradient(170deg,#150d28,#0a0616);border:1px solid rgba(255,255,255,.12);
+    padding:16px;box-shadow:0 30px 80px -30px #000;animation:pop .24s cubic-bezier(.2,.9,.3,1) both}
+  @keyframes pop{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
+  .sheet .sh-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .sheet .sh-head b{font-size:14px}
+  .sheet .x{margin-left:auto;width:30px;height:30px;border-radius:9px;border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.06);color:#fff;font-size:14px;cursor:pointer;line-height:1}
+  .sheet img{width:100%;border-radius:14px;display:block;border:1px solid rgba(255,255,255,.1)}
+  .sheet p{font-size:12px;color:var(--dim);line-height:1.65}
+  .sheet .dl{display:flex;gap:8px;margin-top:12px}
+  .sheet .dl a,.sheet .dl button{
+    flex:1;height:46px;border-radius:12px;display:grid;place-items:center;font-family:inherit;font-size:13px;
+    font-weight:700;text-decoration:none;cursor:pointer;border:0
+  }
+  .sheet .dl a{background:linear-gradient(100deg,#45e8ff,#8f7dff);color:#08131a}
+  .sheet .dl button{background:rgba(255,255,255,.08);color:#ddd;border:1px solid rgba(255,255,255,.12)}
+  .tip{margin-top:10px;font-size:10.5px;color:var(--gold);text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="lattice"></div>
+<main class="app">
+
+  <div class="top">
+    <div class="seal">卯</div>
+    <div class="brand">
+      <b>묘신령 <i>卯神靈</i></b>
+      <span>AI 사주 · 츤데레 고양이 신령</span>
+    </div>
+    <div class="pill">무료 체험</div>
+  </div>
+
+  <section class="hero">
+    <div class="hero-frame">
+      <div class="hero-in">
+        <img src="{{IMG_MAIN}}" alt="태블릿을 든 묘신령">
+        <div class="hero-tag">
+          <span>만세력 엔진 v0.1</span>
+          <span>1900~2050</span>
+        </div>
+        <div class="bubble">
+          <i class="tail"></i>
+          집사야, 태어난 때부터 대라냥.<br>
+          <b>거짓말하면 부적으로 때린다?</b>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="formCard">
+    <div class="card-h">
+      <i class="dot"></i><b>사주 정보 입력</b><small>양력 기준 · 30초</small>
+    </div>
+
+    <div class="field">
+      <label>이름 / 닉네임</label>
+      <input class="input" id="name" type="text" maxlength="12" placeholder="집사" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>생년월일 <em>양력</em></label>
+      <input class="input" id="birth" type="date" min="1900-01-01" max="2050-12-31" value="">
+    </div>
+
+    <div class="field">
+      <label>태어난 시간 <em>시진</em></label>
+      <select class="input" id="hour"></select>
+    </div>
+
+    <div class="field">
+      <label>성별</label>
+      <div class="seg" id="gender">
+        <button type="button" data-v="여성" aria-pressed="true">여성</button>
+        <button type="button" data-v="남성" aria-pressed="false">남성</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>오늘 가장 궁금한 고민 <em>택1</em></label>
+      <div class="chips" id="concern">
+        <button type="button" data-v="love" aria-pressed="false"><span class="ico">💔</span>연애 / 재회</button>
+        <button type="button" data-v="money" aria-pressed="true"><span class="ico">💰</span>재물 / 부업</button>
+        <button type="button" data-v="job" aria-pressed="false"><span class="ico">🏢</span>직장 / 진로</button>
+        <button type="button" data-v="total" aria-pressed="false"><span class="ico">🌙</span>올해 총운</button>
+      </div>
+    </div>
+
+    <button class="cta" id="go">묘신령에게 사주 보기</button>
+    <p class="cta-note">사주는 재미로 보는 거다냥. 인생 결정은 네가 해라.</p>
+  </section>
+
+  <section id="result"></section>
+
+  <p class="foot">
+    <b>卯神靈 v0.1 · 프로토타입</b><br>
+    만세력: 입춘·24절기 정확 테이블(1900~2050) + 율리우스일 60갑자 · 시주는 오자시법, 일진은 자시(23:00)에 바뀝니다.<br>
+    이 사주는 오락용이야. 의료·투자·법률 판단의 근거로 쓰지 마라냥.
+  </p>
+</main>
+
+<div class="modal" id="modal">
+  <div class="sheet">
+    <div class="sh-head"><b id="mTitle">묘신령</b><button class="x" id="mClose">✕</button></div>
+    <div id="mBody"></div>
+  </div>
+</div>
+
+<script>{{TABLE_JS}}</script>
+<script>{{ENGINE_JS}}</script>
+<script>{{DATA_JS}}</script>
+<script>
+/* ============================================================
+   묘신령 앱 로직
+   ============================================================ */
+(function(){
+  "use strict";
+  var D = MYO_DATA, E = SAJU.ELEMENTS, INFO = D.elementInfo;
+  var COLOR = {목:"#2fe08b", 화:"#ff4d63", 토:"#ffc247", 금:"#e6f2ff", 수:"#3fd0ff"};
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var state = { result:null, inputs:null, cardDataUrl:null };
+
+  /* --- 시진 셀렉트 채우기 --- */
+  (function fillHours(){
+    var sel = $("#hour");
+    sel.innerHTML = '<option value="null">모름 (태어난 시간 모름)</option>' +
+      SAJU.SIZIN.map(function(s, i){
+        return '<option value="'+i+'">'+s.name+' · '+s.range+'</option>';
+      }).join("");
+    sel.value = "6"; // 오시 기본
+  })();
+
+  /* --- 버튼 그룹 --- */
+  function segInit(sel, single){
+    var wrap = $(sel);
+    wrap.addEventListener("click", function(e){
+      var b = e.target.closest("button"); if(!b) return;
+      if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      Array.prototype.forEach.call(wrap.children, function(c){
+        c.setAttribute("aria-pressed", String(c === b));
+      });
+    });
+  }
+  segInit("#gender"); segInit("#concern");
+
+  function pressedValue(sel){
+    var b = $(sel).querySelector('button[aria-pressed="true"]');
+    return b ? b.dataset.v : null;
+  }
+
+  /* --- 오행 방울 SVG --- */
+  function bellSVG(color, dim){
+    return '<svg viewBox="0 0 44 54" aria-hidden="true">' +
+      '<defs><linearGradient id="g'+color.replace("#","")+(dim?"d":"")+'" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="'+color+'" stop-opacity="'+(dim?"0.35":"1")+'"/>' +
+      '<stop offset="1" stop-color="'+color+'" stop-opacity="'+(dim?"0.12":"0.62")+'"/></linearGradient></defs>' +
+      '<path d="M22 3.5c-1.9 0-3.4 1.5-3.4 3.4v1.6C12.7 10 8 15.3 8 21.6v8.3l-3.4 5.6c-.9 1.5.2 3.4 1.9 3.4h31c1.7 0 2.8-1.9 1.9-3.4L36 29.9v-8.3C36 15.3 31.3 10 25.4 8.5V6.9c0-1.9-1.5-3.4-3.4-3.4z" ' +
+      'fill="url(#g'+color.replace("#","")+(dim?"d":"")+')" stroke="'+color+'" stroke-width="1.4" stroke-opacity="'+(dim?"0.45":"0.85")+'" stroke-linejoin="round"/>' +
+      '<circle cx="22" cy="46" r="4.2" fill="'+color+'" fill-opacity="'+(dim?"0.35":"0.9")+'"/></svg>';
+  }
+
+  /* --- 사주 명식표 --- */
+  function chartHTML(res, hourKnown){
+    var order = [["year","년주"],["month","월주"],["day","일주"],["hour","시주"]];
+    var head = '<div class="head"></div>' + order.map(function(o){ return '<div class="head">'+o[1]+'</div>'; }).join("");
+    function row(kind){
+      var lab = kind === "stem" ? "천간" : "지지";
+      var cells = order.map(function(o){
+        var p = res.pillars[o[0]];
+        if(!p){
+          return '<div class="cell unknown" style="--c:#6b6190"><span class="hanja">?</span><span class="k">모름</span><span class="el">?</span></div>';
+        }
+        var idx = kind === "stem" ? p.stem : p.branch;
+        var obj = kind === "stem" ? SAJU.STEMS[idx] : SAJU.BRANCHES[idx];
+        var c = COLOR[obj.e];
+        var me = (o[0] === "day" && kind === "stem") ? " me" : "";
+        return '<div class="cell'+me+'" style="--c:'+c+'"><span class="hanja">'+obj.h+'</span>' +
+               '<span class="k">'+obj.k+'</span><span class="el">'+obj.e+'</span></div>';
+      }).join("");
+      return '<div class="rowlab">'+lab+'</div>' + cells;
+    }
+    return '<div class="chart">'+head + row("stem") + row("branch") + '</div>';
+  }
+
+  /* --- 오행 방울 --- */
+  function bellsHTML(res){
+    return '<div class="bells">' + E.map(function(e){
+      var n = res.counts[e], pct = res.percent[e];
+      return '<div class="bell'+(n===0?' zero':'')+'" style="--c:'+COLOR[e]+'">' +
+        '<div class="bwrap">'+bellSVG(COLOR[e], n===0)+'<span class="cnt">'+n+'</span></div>' +
+        '<div class="nm">'+INFO[e].hanja+' '+e+'</div>' +
+        '<div class="pct">'+pct+'%</div></div>';
+    }).join("") + '</div>';
+  }
+
+  function stackHTML(res){
+    var segs = E.filter(function(e){ return res.counts[e] > 0; }).map(function(e){
+      return '<i style="width:'+res.percent[e]+'%;background:'+COLOR[e]+'"></i>';
+    }).join("");
+    return '<div class="stack">'+segs+'</div>' +
+      '<div class="stack-legend"><span>목 · 화 · 토 · 금 · 수</span><span>총 '+res.total+'글자</span></div>';
+  }
+
+  function gradeOf(res){
+    var mean = res.total / 5, spread = 0;
+    E.forEach(function(e){ spread += Math.abs(res.counts[e] - mean) / mean; });
+    var score = Math.max(20, Math.min(97, Math.round(100 - 11 * spread - 8 * res.lacking.length)));
+    var g = D.grade.filter(function(x){ return score >= x.min; })[0] || D.grade[3];
+    return { score: score, label: g.label, note: g.note };
+  }
+
+  /* --- 렌더 --- */
+  function render(res, inputs){
+    var c = D.concerns[inputs.concern];
+    var weak = res.weakest, strong = res.strongest;
+    var g = gradeOf(res);
+    var roast = D.roast[weak][inputs.concern];
+    var luck = D.luck[strong];
+    var name = inputs.name || "집사";
+    var nick = name + (name === "집사" ? "" : " 집사");
+
+    var el = $("#result");
+    el.innerHTML =
+      '<div class="sect-title"><i class="bar"></i><b>' + nick + '의 사주 명식</b><small>' + inputs.birth + ' ' + (inputs.hourLabel) + '</small></div>' +
+      '<div class="card">' +
+        chartHTML(res, res.hourKnown) +
+        '<div class="chart-foot">' +
+          '<span class="tag">일간 <b>' + res.dayMaster.h + ' ' + res.dayMaster.k + ' (' + res.dayMaster.e + ')</b></span>' +
+          '<span class="tag">월 절기 <b>' + res.monthJeol + '</b></span>' +
+          '<span class="tag">사주년 <b>' + res.sajuYear + '</b></span>' +
+          '<span class="tag">성별 <b>' + inputs.gender + '</b></span>' +
+          (res.hourKnown ? '' : '<span class="tag">시주 <b>모름(6글자)</b></span>') +
+        '</div>' +
+      '</div>' +
+
+      '<div class="sect-title"><i class="bar"></i><b>오행 오색 방울</b><small>8글자 분포</small></div>' +
+      '<div class="card">' +
+        bellsHTML(res) + stackHTML(res) +
+        '<div class="verdict">' +
+          '<div style="--c:'+COLOR[strong]+'"><b><em>' + strong + '</em> 가장 강함</b>' + res.counts[strong] + '개 · ' + res.percent[strong] + '%</div>' +
+          '<div style="--c:'+COLOR[weak]+'"><b><em>' + weak + '</em> 가장 약함</b>' + (res.counts[weak]===0 ? '아예 없음 · 0개' : res.counts[weak] + '개 · ' + res.percent[weak] + '%') + '</div>' +
+        '</div>' +
+        '<div class="verdict" style="margin-top:8px"><div style="flex:1 1 100%"><b>오행 밸런스 <em>' + g.score + '점</em> · ' + g.label + '</b>' + g.note + '</div></div>' +
+      '</div>' +
+
+      '<div class="sect-title"><i class="bar"></i><b>묘신령 1타 팩폭</b><small>' + weak + ' ' + res.counts[weak] + '개 × ' + c.label + '</small></div>' +
+      '<div class="shot roast"><img src="{{IMG_ROAST}}" alt="팩폭하는 묘신령"><span class="badge">1타 팩폭</span></div>' +
+      '<div class="say">' +
+        '<div class="who"><b>卯神靈</b>· 태블릿 화면을 툭</div>' +
+        '<div class="line">' + roast + '</div>' +
+        '<small>부족한 기운: ' + (res.lacking.length ? res.lacking.join(" · ") + ' (0개)' : weak + ' (' + res.counts[weak] + '개, 최소)') + '</small>' +
+      '</div>' +
+
+      '<div class="sect-title"><i class="bar"></i><b>반전 솜방망이 위로</b><small>' + strong + ' 기운 · 귀인운</small></div>' +
+      '<div class="shot luck"><img src="{{IMG_LUCK}}" alt="솜방망이로 액운을 쳐내는 묘신령"><span class="badge">반전 위로</span></div>' +
+      '<div class="say warm">' +
+        '<div class="who"><b>卯神靈</b>· 솜방망이로 액운을 털어내며</div>' +
+        '<div class="warm-head">' + luck.headline + '</div>' +
+        '<div class="line">' + luck.body + '</div>' +
+        '<dl class="luck-grid">' +
+          '<div><dt>귀인 색</dt><dd>' + luck.color + '</dd></div>' +
+          '<div><dt>귀인 방향</dt><dd>' + luck.dir + '</dd></div>' +
+          '<div><dt>귀인 시진</dt><dd>' + luck.time + '</dd></div>' +
+          '<div class="wide" style="grid-column:auto"><dt>오늘 할 일</dt><dd>' + luck.action + '</dd></div>' +
+        '</dl>' +
+      '</div>' +
+
+      '<div class="sect-title"><i class="bar"></i><b>팩폭 카드 저장</b><small>스레드 · 인스타</small></div>' +
+      '<div class="card">' +
+        '<button class="share-btn" id="cardBtn">스레드/인스타용 팩폭 카드 저장</button>' +
+        '<p class="share-note">9:16 세로형 1080×1920 PNG로 만들어 준다냥. 미리보기에서 저장해라.</p>' +
+      '</div>' +
+
+      '<div class="sect-title"><i class="bar"></i><b>묘신령 유료 상품</b><small>프로토타입 체험</small></div>' +
+      D.paywall.map(function(p){
+        return '<div class="lock">' +
+          '<span class="lb">🔒 ' + p.badge + '</span>' +
+          '<h4>' + p.title + '</h4>' +
+          '<p>' + p.desc + '</p>' +
+          '<ul>' + p.lines.map(function(l){ return '<li>' + l + '</li>'; }).join("") + '</ul>' +
+          '<div class="buy"><span class="price">' + p.price + '<small>/ 1회</small></span>' +
+          '<button class="go" data-pay="' + p.id + '">잠금 해제</button></div>' +
+        '</div>';
+      }).join("");
+
+    el.classList.add("show");
+    $("#cardBtn").addEventListener("click", function(){ makeCard(res, inputs, roast, weak, strong); });
+    Array.prototype.forEach.call(el.querySelectorAll("[data-pay]"), function(b){
+      b.addEventListener("click", function(){ openPaywall(b.dataset.pay); });
+    });
+    state.result = res; state.inputs = inputs;
+
+    setTimeout(function(){
+      el.scrollIntoView({ behavior:"smooth", block:"start" });
+    }, 60);
+  }
+
+  /* --- 제출 --- */
+  $("#go").addEventListener("click", function(){
+    var btn = this;
+    var birth = $("#birth").value;
+    if(!birth){ alert("생년월일을 골라달라냥."); return; }
+    var parts = birth.split("-").map(Number);
+    if(parts[0] < 1900 || parts[0] > 2050){ alert("1900~2050년 사이만 볼 수 있다냥."); return; }
+
+    var hv = $("#hour").value;
+    var sizinIndex = (hv === "null") ? null : Number(hv);
+    var inputs = {
+      name: ($("#name").value || "").trim(),
+      birth: birth,
+      birthY: parts[0], birthM: parts[1], birthD: parts[2],
+      sizinIndex: sizinIndex,
+      hourLabel: sizinIndex === null ? "시간 모름" : SAJU.SIZIN[sizinIndex].name,
+      gender: pressedValue("#gender") || "여성",
+      concern: pressedValue("#concern") || "total"
+    };
+
+    btn.disabled = true; btn.textContent = "묘신령이 태블릿 켜는 중…";
+    setTimeout(function(){
+      var res;
+      try{
+        res = SAJU.compute({ y: inputs.birthY, m: inputs.birthM, d: inputs.birthD, sizinIndex: inputs.sizinIndex });
+      }catch(err){
+        console.error(err);
+        alert("사주를 못 봤다냥… 날짜를 다시 확인해라.");
+        btn.disabled = false; btn.textContent = "묘신령에게 사주 보기"; return;
+      }
+      render(res, inputs);
+      btn.disabled = false; btn.textContent = "다시 사주 보기";
+    }, 620);
+  });
+
+  /* --- 모달 --- */
+  function openModal(title, html){
+    $("#mTitle").textContent = title;
+    $("#mBody").innerHTML = html;
+    $("#modal").classList.add("open");
+  }
+  function closeModal(){ $("#modal").classList.remove("open"); }
+  $("#mClose").addEventListener("click", closeModal);
+  $("#modal").addEventListener("click", function(e){ if(e.target === this) closeModal(); });
+
+  /* --- 유료 상품 체험 모달 --- */
+  function openPaywall(id){
+    var p = D.paywall.filter(function(x){ return x.id === id; })[0];
+    if(!p) return;
+    openModal("유료 상품 · " + p.badge,
+      '<p style="margin-top:0"><b style="color:#fff;font-size:15px">' + p.title + '</b></p>' +
+      '<p>' + p.desc + '</p>' +
+      '<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:12px;margin:12px 0">' +
+        '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:#cfc6e6"><span>결제 금액</span><b style="color:#ffd166">' + p.price + '</b></div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:#cfc6e6;margin-top:6px"><span>제공</span><span>' + (p.provide || "1회 리포트") + '</span></div>' +
+      '</div>' +
+      '<p style="color:#ffd166">체험 모드다냥. 지금은 실제 결제가 일어나지 않고, 결제 화면까지의 흐름만 보여준다.</p>' +
+      '<div class="dl"><button id="payTry" style="flex:1;height:46px;border-radius:12px;border:0;font-family:inherit;font-weight:800;font-size:13.5px;color:#2a1d05;background:linear-gradient(100deg,#ffd166,#ffb02e);cursor:pointer">결제 화면 미리보기</button></div>' +
+      '<div id="payMsg" class="tip"></div>');
+    $("#payTry").addEventListener("click", function(){
+      this.disabled = true;
+      this.textContent = "결제 모듈 연결 중…";
+      var msg = $("#payMsg");
+      setTimeout(function(){
+        msg.innerHTML = "정식 출시 때 토스페이먼츠·애플페이로 연결될 자리다냥.<br>프로토타입에서는 여기서 멈춘다.";
+      }, 700);
+    });
+  }
+
+  /* --- 팩폭 카드 (Canvas 1080×1920) --- */
+  function wrapText(ctx, text, maxWidth, maxLines){
+    var lines = [], line = "";
+    for(var i=0;i<text.length;i++){
+      var ch = text[i];
+      if(ch === "\n"){ lines.push(line); line = ""; continue; }
+      if(ctx.measureText(line + ch).width > maxWidth){
+        lines.push(line); line = ch;
+        if(lines.length === maxLines - 1) break;
+      } else { line += ch; }
+    }
+    if(line && lines.length < maxLines) lines.push(line);
+    return lines;
+  }
+
+  function makeCard(res, inputs, roast, weak, strong){
+    var W = 1080, H = 1920;
+    var cv = document.createElement("canvas");
+    cv.width = W; cv.height = H;
+    var ctx = cv.getContext("2d");
+    var img = new Image();
+    img.onload = function(){
+      try{ drawCard(ctx, img, res, inputs, roast, weak, strong, W, H); }
+      catch(err){ console.error(err); alert("카드를 못 만들었다냥… 다시 시도해봐."); return; }
+      state.cardDataUrl = cv.toDataURL("image/png");
+      openCardModal(state.cardDataUrl, inputs);
+    };
+    img.onerror = function(){ alert("이미지를 못 불러왔다냥."); };
+    img.src = "{{IMG_ROAST}}";
+  }
+
+  function roundRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y); ctx.closePath();
+  }
+
+  function drawCard(ctx, img, res, inputs, roast, weak, strong, W, H){
+    var FONT = '"Apple SD Gothic Neo","Noto Sans KR","Noto Sans CJK KR","Malgun Gothic",sans-serif';
+    // 배경
+    var bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, "#0a0518"); bg.addColorStop(.55, "#100823"); bg.addColorStop(1, "#06030f");
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    var gl1 = ctx.createRadialGradient(W*0.15, H*0.08, 0, W*0.15, H*0.08, W*0.85);
+    gl1.addColorStop(0, "rgba(255,79,216,.30)"); gl1.addColorStop(1, "rgba(255,79,216,0)");
+    ctx.fillStyle = gl1; ctx.fillRect(0, 0, W, H);
+    var gl2 = ctx.createRadialGradient(W*0.9, H*0.92, 0, W*0.9, H*0.92, W*0.8);
+    gl2.addColorStop(0, "rgba(69,232,255,.22)"); gl2.addColorStop(1, "rgba(69,232,255,0)");
+    ctx.fillStyle = gl2; ctx.fillRect(0, 0, W, H);
+    // 격자
+    ctx.strokeStyle = "rgba(120,180,255,.07)"; ctx.lineWidth = 1;
+    for(var x=0;x<W;x+=54){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for(var y=0;y<H;y+=54){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+    // 이미지 (cover)
+    var ix = 60, iy = 190, iw = W - 120, ih = 860;
+    var ar = img.width / img.height, boxAr = iw / ih;
+    var sw, sh, sx, sy;
+    if(ar > boxAr){ sh = img.height; sw = sh * boxAr; sx = (img.width - sw)/2; sy = 0; }
+    else { sw = img.width; sh = sw / boxAr; sx = 0; sy = (img.height - sh) * 0.30; }
+    ctx.save();
+    roundRect(ctx, ix, iy, iw, ih, 40); ctx.clip();
+    ctx.drawImage(img, sx, sy, sw, sh, ix, iy, iw, ih);
+    var fade = ctx.createLinearGradient(0, iy + ih*0.55, 0, iy + ih);
+    fade.addColorStop(0, "rgba(10,5,24,0)"); fade.addColorStop(1, "rgba(10,5,24,.9)");
+    ctx.fillStyle = fade; ctx.fillRect(ix, iy, iw, ih);
+    ctx.restore();
+    ctx.strokeStyle = "rgba(255,79,216,.55)"; ctx.lineWidth = 3;
+    roundRect(ctx, ix, iy, iw, ih, 40); ctx.stroke();
+
+    // 상단 브랜드
+    ctx.fillStyle = "#ff4fd8";
+    roundRect(ctx, 60, 56, 92, 92, 24); ctx.fill();
+    ctx.fillStyle = "#0a0518"; ctx.font = "800 56px " + FONT; ctx.textAlign = "center";
+    ctx.fillText("卯", 106, 122);
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#ffffff"; ctx.font = "800 42px " + FONT;
+    ctx.fillText("묘신령", 176, 104);
+    ctx.fillStyle = "#8ee9ff"; ctx.font = "600 25px " + FONT;
+    ctx.fillText("AI 사주 · 1타 팩폭 카드", 176, 140);
+
+    // 배지
+    ctx.fillStyle = "rgba(255,77,99,.94)";
+    roundRect(ctx, ix + 26, iy + 26, 206, 60, 30); ctx.fill();
+    ctx.fillStyle = "#12050a"; ctx.font = "800 29px " + FONT; ctx.textAlign = "center";
+    ctx.fillText("1타 팩폭", ix + 26 + 103, iy + 66);
+    ctx.textAlign = "left";
+
+    // 이름
+    var dispName = (inputs.name || "집사") + " 집사";
+    var nf = 58;
+    ctx.fillStyle = "#ffffff";
+    do { ctx.font = "800 " + nf + "px " + FONT; nf -= 2; }
+    while (ctx.measureText(dispName).width > W - 150 && nf > 30);
+    ctx.fillText(dispName, 70, 1164);
+    ctx.fillStyle = "#9d93bb"; ctx.font = "500 27px " + FONT;
+    ctx.fillText(inputs.birth + " " + inputs.hourLabel + " · " + inputs.gender, 70, 1206);
+
+    // 8글자
+    var order = ["year","month","day","hour"], labels = ["년","월","일","시"];
+    var bx = 70, by = 1274, bw = 96, bh = 136, gap = 12;
+    order.forEach(function(k, i){
+      var p = res.pillars[k];
+      var x0 = bx + i * (bw + gap);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#7b719a"; ctx.font = "600 20px " + FONT;
+      ctx.fillText(labels[i], x0 + bw/2, by - 14);
+      ctx.fillStyle = "rgba(255,255,255,.07)";
+      roundRect(ctx, x0, by, bw, bh, 18); ctx.fill();
+      ctx.strokeStyle = (k === "day") ? "rgba(255,79,216,.6)" : "rgba(255,255,255,.14)";
+      ctx.lineWidth = (k === "day") ? 3 : 2; ctx.stroke();
+      if(p){
+        var s1 = SAJU.STEMS[p.stem], b1 = SAJU.BRANCHES[p.branch];
+        ctx.fillStyle = COLOR[s1.e]; ctx.font = "800 44px " + FONT;
+        ctx.fillText(s1.h, x0 + bw/2, by + 62);
+        ctx.fillStyle = COLOR[b1.e]; ctx.font = "800 44px " + FONT;
+        ctx.fillText(b1.h, x0 + bw/2, by + 118);
+      } else {
+        ctx.fillStyle = "#6b6190"; ctx.font = "800 40px " + FONT;
+        ctx.fillText("??", x0 + bw/2, by + 90);
+      }
+      ctx.textAlign = "left";
+    });
+
+    // 오행 요약 (8글자 박스 아래 한 줄)
+    var tx = 70, ty = 1462;
+    ctx.font = "800 25px " + FONT;
+    E.forEach(function(e){
+      var token = INFO[e].hanja + " " + res.counts[e];
+      ctx.fillStyle = COLOR[e];
+      ctx.fillText(token, tx, ty);
+      tx += ctx.measureText(token).width + 30;
+    });
+
+    // 부족한 기운
+    ctx.fillStyle = "#ffd166"; ctx.font = "700 26px " + FONT;
+    ctx.fillText("부족한 기운 · " + (res.lacking.length ? res.lacking.join(" ") + " 0개" : weak + " " + res.counts[weak] + "개"), 70, 1512);
+
+    // 팩폭 본문
+    ctx.fillStyle = "#ffffff"; ctx.font = "800 45px " + FONT;
+    var lines = wrapText(ctx, roast, W - 140, 4);
+    lines.forEach(function(l, i){ ctx.fillText(l, 70, 1576 + i * 60); });
+
+    // 하단
+    ctx.strokeStyle = "rgba(255,255,255,.14)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(70, 1800); ctx.lineTo(W - 70, 1800); ctx.stroke();
+    ctx.fillStyle = "#8ee9ff"; ctx.font = "700 29px " + FONT;
+    ctx.fillText("나도 사주 볼래  →  묘신령에게 물어보기", 70, 1852);
+    ctx.fillStyle = "#6b6190"; ctx.font = "500 22px " + FONT;
+    ctx.fillText("만세력 엔진 · 입춘/24절기 · 60갑자  |  재미로 보는 사주", 70, 1892);
+  }
+
+  function openCardModal(dataUrl, inputs){
+    openModal("팩폭 카드 미리보기",
+      '<img src="' + dataUrl + '" alt="팩폭 카드">' +
+      '<div class="dl">' +
+        '<a href="' + dataUrl + '" download="묘신령-팩폭카드.png">PNG 저장</a>' +
+        '<button id="closeCard">닫기</button>' +
+      '</div>' +
+      '<p class="tip">아이폰 사파리에서는 이미지를 길게 눌러 <b>‘사진에 저장’</b>하면 된다냥.</p>');
+    $("#closeCard").addEventListener("click", closeModal);
+  }
+})();
+</script>
+</body>
+</html>
